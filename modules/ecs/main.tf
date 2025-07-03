@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "ecs_task_def" {
       logDriver = "awslogs"
       options = {
         awslogs-group         = var.ecs_log_group_name
-        awslogs-region        = data.aws_region.current.name
+        awslogs-region        = data.aws_region.current.region
         awslogs-stream-prefix = "ecs"
       }
     }

@@ -23,7 +23,7 @@ resource "aws_codebuild_project" "terraform_codebuild_project" {
     image_pull_credentials_type = var.builder_image_pull_credentials_type
     environment_variable {
       name  = "AWS_DEFAULT_REGION"
-      value = data.aws_region.current.name
+      value = data.aws_region.current.region
     }
     environment_variable {
       name  = "AWS_ACCOUNT_ID"

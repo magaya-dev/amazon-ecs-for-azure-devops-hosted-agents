@@ -12,7 +12,7 @@ output "clone_url_http" {
 }
 
 output "clone_url_http_grc" {
-  value       = "codecommit::${data.aws_region.current.name}://${var.source_repository_name}"
+  value       = "codecommit::${data.aws_region.current.region}://${var.source_repository_name}"
   description = "List containing the clone url of the CodeCommit repositories"
 }
 

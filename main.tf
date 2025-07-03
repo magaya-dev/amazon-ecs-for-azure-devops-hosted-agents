@@ -6,18 +6,18 @@
 
 
 #Module for creating a new S3 bucket for storing pipeline artifacts
-module "s3_artifacts_bucket" {
-  source                = "./modules/s3"
-  project_name          = var.project_name
-  kms_key_arn           = module.codepipeline_kms.arn
-  codepipeline_role_arn = module.codepipeline_iam_role.role_arn
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
-}
+# module "s3_artifacts_bucket" {
+#   source                = "./modules/s3"
+#   project_name          = var.project_name
+#   kms_key_arn           = module.codepipeline_kms.arn
+#   codepipeline_role_arn = module.codepipeline_iam_role.role_arn
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
+# }
 
 # Resources
 data "local_file" "buildspec_local" {
@@ -25,100 +25,100 @@ data "local_file" "buildspec_local" {
 }
 
 # Module for Infrastructure Source code repository
-module "codecommit_ado_agent_repo" {
-  source = "./modules/codecommit"
+# module "codecommit_ado_agent_repo" {
+#   source = "./modules/codecommit"
 
-  create_new_repo          = var.create_new_repo
-  source_repository_name   = var.source_repo_name
-  source_repository_branch = var.source_repo_branch
-  kms_key_arn              = module.codepipeline_kms.arn
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
+#   create_new_repo          = var.create_new_repo
+#   source_repository_name   = var.source_repo_name
+#   source_repository_branch = var.source_repo_branch
+#   kms_key_arn              = module.codepipeline_kms.arn
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
 
-}
+# }
 
 # Module for Infrastructure Validation - CodeBuild
-module "codebuild" {
-  depends_on = [
-    module.codecommit_ado_agent_repo
-  ]
-  source = "./modules/codebuild"
+# module "codebuild" {
+#   depends_on = [
+#     module.codecommit_ado_agent_repo
+#   ]
+#   source = "./modules/codebuild"
 
-  project_name                        = var.project_name
-  role_arn                            = module.codepipeline_iam_role.role_arn
-  s3_bucket_name                      = module.s3_artifacts_bucket.bucket
-  build_projects                      = var.build_projects
-  build_project_source                = var.build_project_source
-  builder_compute_type                = var.builder_compute_type
-  builder_image                       = var.builder_image
-  builder_image_pull_credentials_type = var.builder_image_pull_credentials_type
-  builder_type                        = var.builder_type
-  kms_key_arn                         = module.codepipeline_kms.arn
-  ecr_repository_name                 = var.ecr_repo_name
-  build_spec                          = data.local_file.buildspec_local.content
-  container_image_tag                 = var.container_image_tag
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
-}
+#   project_name                        = var.project_name
+#   role_arn                            = module.codepipeline_iam_role.role_arn
+#   s3_bucket_name                      = module.s3_artifacts_bucket.bucket
+#   build_projects                      = var.build_projects
+#   build_project_source                = var.build_project_source
+#   builder_compute_type                = var.builder_compute_type
+#   builder_image                       = var.builder_image
+#   builder_image_pull_credentials_type = var.builder_image_pull_credentials_type
+#   builder_type                        = var.builder_type
+#   kms_key_arn                         = module.codepipeline_kms.arn
+#   ecr_repository_name                 = var.ecr_repo_name
+#   build_spec                          = data.local_file.buildspec_local.content
+#   container_image_tag                 = var.container_image_tag
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
+# }
 
-module "codepipeline_kms" {
-  source                = "./modules/kms"
-  codepipeline_role_arn = module.codepipeline_iam_role.role_arn
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
+# module "codepipeline_kms" {
+#   source                = "./modules/kms"
+#   codepipeline_role_arn = module.codepipeline_iam_role.role_arn
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
 
-}
+# }
 
-module "codepipeline_iam_role" {
-  source                            = "./modules/iam-role"
-  project_name                      = var.project_name
-  create_new_role                   = var.create_new_role
-  codepipeline_iam_role_name        = var.create_new_role == true ? "${var.project_name}-codepipeline-role" : var.codepipeline_iam_role_name
-  source_repository_name            = var.source_repo_name
-  kms_key_arn                       = module.codepipeline_kms.arn
-  s3_bucket_arn                     = module.s3_artifacts_bucket.arn
-  infrastructure_deployer_role_name = "infra-deployer-role"
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
-}
-# Module for Infrastructure Validate, Plan, Apply and Destroy - CodePipeline
-module "codepipeline" {
-  depends_on = [
-    module.codebuild,
-    module.s3_artifacts_bucket
-  ]
-  source = "./modules/codepipeline"
+# module "codepipeline_iam_role" {
+#   source                            = "./modules/iam-role"
+#   project_name                      = var.project_name
+#   create_new_role                   = var.create_new_role
+#   codepipeline_iam_role_name        = var.create_new_role == true ? "${var.project_name}-codepipeline-role" : var.codepipeline_iam_role_name
+#   source_repository_name            = var.source_repo_name
+#   kms_key_arn                       = module.codepipeline_kms.arn
+#   s3_bucket_arn                     = module.s3_artifacts_bucket.arn
+#   infrastructure_deployer_role_name = "infra-deployer-role"
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
+# }
+# # Module for Infrastructure Validate, Plan, Apply and Destroy - CodePipeline
+# module "codepipeline" {
+#   depends_on = [
+#     module.codebuild,
+#     module.s3_artifacts_bucket
+#   ]
+#   source = "./modules/codepipeline"
 
-  project_name          = var.project_name
-  source_repo_name      = var.source_repo_name
-  source_repo_branch    = var.source_repo_branch
-  s3_bucket_name        = module.s3_artifacts_bucket.bucket
-  codepipeline_role_arn = module.codepipeline_iam_role.role_arn
-  stages                = var.stage_input
-  kms_key_arn           = module.codepipeline_kms.arn
-  tags = {
-    Project_Name = var.project_name
-    Environment  = var.environment
-    Account_ID   = local.account_id
-    Region       = local.region
-  }
-}
+#   project_name          = var.project_name
+#   source_repo_name      = var.source_repo_name
+#   source_repo_branch    = var.source_repo_branch
+#   s3_bucket_name        = module.s3_artifacts_bucket.bucket
+#   codepipeline_role_arn = module.codepipeline_iam_role.role_arn
+#   stages                = var.stage_input
+#   kms_key_arn           = module.codepipeline_kms.arn
+#   tags = {
+#     Project_Name = var.project_name
+#     Environment  = var.environment
+#     Account_ID   = local.account_id
+#     Region       = local.region
+#   }
+# }
 
 
 # Module for Infrastructure- ECR
@@ -132,6 +132,16 @@ module "ecr" {
     Account_ID   = local.account_id
     Region       = local.region
   }
+  # Local-exec Provisioner to push the image to ECR
+  provisioner "local-exec" {
+    command = <<EOT
+      aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${local.region}.amazonaws.com
+      REPO_URI=${module.ecr.repository_url}
+      IMAGE_TAG=${var.container_image_tag}
+      docker build -t $REPO_URI:$IMAGE_TAG ado_agent_repo
+      docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest
+      docker push $REPO_URI:$IMAGE_TAG
+    EOT
 }
 
 module "iam_ecs_task_exec_role" {
@@ -254,7 +264,7 @@ module "ecs_ado_api" {
   api_path_part         = "create-task"
   api_stage_name        = "dev"
   api_stage_description = "ECS Ado API Deployment"
-  apigw_lambda_arn      = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${module.create_task_lambda.lambda_function_arn}/invocations"
+  apigw_lambda_arn      = "arn:aws:apigateway:${data.aws_region.current.region}:lambda:path/2015-03-31/functions/${module.create_task_lambda.lambda_function_arn}/invocations"
   function_name         = module.create_task_lambda.lambda_function_name
   tags                  = local.resource_tags
 }

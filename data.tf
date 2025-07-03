@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "lambda_create_task_role_policy" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:*"]
   }
 
   statement {
@@ -118,7 +118,7 @@ data "aws_iam_policy_document" "lambda_get_task_role_policy" {
       "logs:GetLogEvents",
       "logs:FilterLogEvents"
     ]
-    resources = ["arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"]
+    resources = ["arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:*"]
   }
 
   statement {
@@ -139,7 +139,7 @@ data "aws_iam_policy_document" "lambda_get_task_role_policy" {
     actions = [
       "ecs:DescribeTasks"
     ]
-    resources = ["arn:aws:ecs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:task/${local.prefix}-ecs-cluster-${var.environment}/*"]
+    resources = ["arn:aws:ecs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:task/${local.prefix}-ecs-cluster-${var.environment}/*"]
   }
   statement {
     actions = [

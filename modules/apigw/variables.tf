@@ -33,7 +33,7 @@ variable "api_path_part" {
 variable "api_stage_name" {
   description = "Name of the API GW Stage"
   type        = string
-  default     = "dev"
+  default     = "sandbox"
 }
 
 variable "api_stage_description" {

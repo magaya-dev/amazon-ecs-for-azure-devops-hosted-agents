@@ -53,12 +53,12 @@ resource "aws_lambda_permission" "api_lambda" {
   action        = "lambda:InvokeFunction"
   function_name = var.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.api.id}/*/*/*"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:${aws_api_gateway_rest_api.api.id}/*/*/*"
 }
 
 resource "aws_api_gateway_deployment" "api_deployment" {
   rest_api_id = aws_api_gateway_rest_api.api.id
-  stage_name  = var.api_stage_name
+  # stage_name  = var.api_stage_name
   description = var.api_stage_description
   depends_on  = [aws_api_gateway_integration.post-method]
   
@@ -69,4 +69,12 @@ resource "aws_api_gateway_deployment" "api_deployment" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_api_gateway_stage" "api_stage" {
+  deployment_id = aws_api_gateway_deployment.api_deployment.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  stage_name  = var.api_stage_name
+  description = var.api_stage_description
+  tags = var.tags
 }

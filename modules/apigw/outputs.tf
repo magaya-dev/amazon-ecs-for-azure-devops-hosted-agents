@@ -5,6 +5,6 @@
 #Amazon Web Services, Inc. or Amazon Web Services EMEA SARL or both.
 
 output "api_invoke_url" {
-  value       = "${aws_api_gateway_deployment.api_deployment.invoke_url}/${var.version_prefix}/${var.api_path_part}"
+  value       = "${aws_api_gateway_stage.api_stage.invoke_url}/${var.version_prefix}/${var.api_path_part}"
   description = "Invoke URL for the Create Task API"
 }

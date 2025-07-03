@@ -1,0 +1,7 @@
+# Default Tags and other Common Variables
+tags:
+  Environment: "sandbox"
+  Owner: "omcintosh@magaya.com"
+  DeployedBy: "Orie McIntosh"
+  Project: "Customer Onboarding Automation"
+  
