@@ -132,16 +132,6 @@ module "ecr" {
     Account_ID   = local.account_id
     Region       = local.region
   }
-  # Local-exec Provisioner to push the image to ECR
-  provisioner "local-exec" {
-    command = <<EOT
-      aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${local.region}.amazonaws.com
-      REPO_URI=${module.ecr.repository_url}
-      IMAGE_TAG=${var.container_image_tag}
-      docker build -t $REPO_URI:$IMAGE_TAG ado_agent_repo
-      docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest
-      docker push $REPO_URI:$IMAGE_TAG
-    EOT
 }
 
 module "iam_ecs_task_exec_role" {
@@ -267,4 +257,24 @@ module "ecs_ado_api" {
   apigw_lambda_arn      = "arn:aws:apigateway:${data.aws_region.current.region}:lambda:path/2015-03-31/functions/${module.create_task_lambda.lambda_function_arn}/invocations"
   function_name         = module.create_task_lambda.lambda_function_name
   tags                  = local.resource_tags
+}
+
+resource "terraform_data" "ecr_repo_push" {
+  depends_on = [
+    module.ecr
+  ]
+  # Ensure the ECR repository is created before pushing the image
+  # repository_url = module.ecr.repository_url
+
+  # Local-exec Provisioner to push the image to ECR
+  provisioner "local-exec" {
+    command = <<EOT
+      aws ecr get-login-password --region ${local.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${local.region}.amazonaws.com
+      REPO_URI=${module.ecr.repository_url}
+      IMAGE_TAG=${var.container_image_tag}
+      docker build -t $REPO_URI:$IMAGE_TAG ado_agent_repo
+      docker tag $REPO_URI:$IMAGE_TAG $REPO_URI:latest
+      docker push $REPO_URI:$IMAGE_TAG
+    EOT
+  }
 }

@@ -1,12 +1,12 @@
-output "codecommit_url_http" {
-  value       = module.codecommit_ado_agent_repo.clone_url_http
-  description = "HTTP URL for CodeCommit Repo"
-}
+# output "codecommit_url_http" {
+#   value       = module.codecommit_ado_agent_repo.clone_url_http
+#   description = "HTTP URL for CodeCommit Repo"
+# }
 
-output "clone_url_http_grc" {
-  value       = module.codecommit_ado_agent_repo.clone_url_http_grc
-  description = "HTTP (GRC) URL for CodeCommit Repo"
-}
+# output "clone_url_http_grc" {
+#   value       = module.codecommit_ado_agent_repo.clone_url_http_grc
+#   description = "HTTP (GRC) URL for CodeCommit Repo"
+# }
 
 output "ecs_ado_api_invoke_url" {
   value       = module.ecs_ado_api.api_invoke_url
